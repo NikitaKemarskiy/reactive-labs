@@ -41,6 +41,7 @@ Thumbs.db
 **/dist
 **/tmp
 **/build
+**/docs/**/*.jpg
 
 # Dependencies #
 ################
@@ -57,9 +58,9 @@ npm-debug.log
 .history
 **/swagger/*
 
-config/local\.js
-config/*local.js
-config/development.js
+**/config/local\.js
+**/config/*local.js
+**/config/development.js
 
 **/.serverless
 env.yml

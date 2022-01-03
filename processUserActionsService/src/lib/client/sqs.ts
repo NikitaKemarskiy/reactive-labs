@@ -19,7 +19,7 @@ function getQueueURL(queueName) {
   return `https://sqs.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_ACCOUNT_ID}/${queueName}`;
 }
 
-export async function getQueueObservable(queueName: string, params?: {
+export function getQueueObservable(queueName: string, params?: {
   adapter?: {
     deserialize: (message: Object) => any,
   },
