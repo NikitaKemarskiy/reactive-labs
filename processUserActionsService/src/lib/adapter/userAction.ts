@@ -25,6 +25,7 @@ export function deserialize(message): UserAction {
   return {
     type: getUserActionType(message),
     userId: message.usedId,
+    url: message.url,
     timestamp: message.timestamp,
   }
 }

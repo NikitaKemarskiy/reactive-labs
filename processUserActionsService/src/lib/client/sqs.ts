@@ -1,14 +1,16 @@
 import * as _ from 'lodash';
 import {
   interval,
-  map,
-  filter
+  mergeMap,
+  filter,
+  Observable
 } from 'rxjs';
 import {
   SQSClient,
   ReceiveMessageCommand,
   DeleteMessageCommand
-} from "@aws-sdk/client-sqs";
+} from '@aws-sdk/client-sqs';
+import { UserAction } from '../type/userAction';
 
 const MESSAGE_POLLING_INTERVAL_MILLISECONDS = 1e3;
 const MESSAGE_VISIBILITY_TIMEOUT_SECONDS = 120;
@@ -19,11 +21,11 @@ function getQueueURL(queueName) {
   return `https://sqs.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_ACCOUNT_ID}/${queueName}`;
 }
 
-export function getQueueObservable(queueName: string, params?: {
-  adapter?: {
-    deserialize: (message: Object) => any,
+export function getQueueObservable<T>(queueName: string, params: {
+  adapter: {
+    deserialize: (message: Object) => T,
   },
-}) {
+}): Observable<T> {
   const queueURL = getQueueURL(queueName);
   const command = new ReceiveMessageCommand({
     QueueUrl: queueURL,
@@ -32,7 +34,7 @@ export function getQueueObservable(queueName: string, params?: {
 
   return interval(MESSAGE_POLLING_INTERVAL_MILLISECONDS)
     .pipe(
-      map(async () => {
+      mergeMap(async () => {
         const data = await client.send(command);
         /**
          * Messages is an array with only one
@@ -50,9 +52,7 @@ export function getQueueObservable(queueName: string, params?: {
           }));
         }
 
-        return params?.adapter
-          ? params.adapter.deserialize(message)
-          : message;
+        return params.adapter.deserialize(message);
       }),
       filter(_.identity),
     );

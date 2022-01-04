@@ -4,15 +4,16 @@ import * as User from './user';
 import * as UserAction from './userAction';
 
 const dbConfig: {
-  database: string,
+  name: string,
   username: string,
   password: string,
   host: string,
   dialect: Dialect,
   logging: boolean,
-} = config.get('db');
+// @ts-ignore
+} = config.db;
 
-const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, {
+const sequelize = new Sequelize(dbConfig.name, dbConfig.username, dbConfig.password, {
   host: dbConfig.host,
   dialect: dbConfig.dialect,
   logging: dbConfig.logging,
