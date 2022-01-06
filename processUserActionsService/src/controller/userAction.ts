@@ -19,14 +19,8 @@ export async function init() {
 
   observable.subscribe({
     next: async (userAction: UserAction) => {
-      console.log('Start handling user action');
-      
       try {
         await userActionDataSource.upsert(userAction);
-
-        if (userAction.type === UserActionType.CLOSE_PAGE) {
-          await cmsService.requestForRemarketing(userAction.url);
-        }
       } catch (err) {
         console.error(err);
       }
@@ -37,14 +31,22 @@ export async function init() {
     complete: () => console.log('Stop handling users\' actions'),
   });
 
-  // observable
-  //   .pipe(
-  //     filter((userAction: UserAction) => userAction.type === UserActionType.CLOSE_PAGE),
-  //     map((userAction: UserAction) => userAction.url)
-  //   )
-  //   .subscribe({
-  //     next: cmsService.requestForRemarketing,
-  //     error: console.error,
-  //     complete: () => console.log('Stop requesting for remarketing by users\' actions'),
-  //   })
+  observable
+    .pipe(
+      filter((userAction: UserAction) => userAction.type === UserActionType.CLOSE_PAGE),
+      map((userAction: UserAction) => userAction.url)
+    )
+    .subscribe({
+      next: async (userActionUrl: string) => {
+        try {
+          await cmsService.requestForRemarketing(userActionUrl);
+        } catch (err) {
+          console.error(err);
+        }
+  
+        console.log('User action handled successfully');
+      },
+      error: console.error,
+      complete: () => console.log('Stop requesting for remarketing by users\' actions'),
+    });
 }

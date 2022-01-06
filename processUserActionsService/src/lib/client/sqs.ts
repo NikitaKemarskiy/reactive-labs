@@ -1,12 +1,14 @@
 import * as _ from 'lodash';
 import {
-  of,
+  share,
+  from,
   catchError,
   interval,
+  map,
   mergeMap,
   filter,
   Observable,
-  EMPTY
+  EMPTY,
 } from 'rxjs';
 import {
   SQSClient,
@@ -41,35 +43,29 @@ export async function getQueueObservable<T>(queue: Queue, params: {
 
   return interval(MESSAGE_POLLING_INTERVAL_MILLISECONDS)
     .pipe(
-      mergeMap((item) => of(item)
+      mergeMap(() => from(client.send(receiveMessageCommand))
         .pipe(
-          mergeMap(async () => {
-            const data = await client.send(receiveMessageCommand);
-            /**
-             * Messages is an array with only one
-             * message - retrieve the first
-             */
-            const message = _.get(data.Messages, 0);
-    
-            /**
-             * There's a message - delete it from queue
-             */
-            if (message) {
-              await client.send(new DeleteMessageCommand({
-                QueueUrl: queueUrl,
-                ReceiptHandle: message.ReceiptHandle,
-              }));              
-            }
+          map((data) => _.get(data.Messages, 0)),
+          filter(_.identity),
+          mergeMap(async (message) => {
+            await client.send(new DeleteMessageCommand({
+              QueueUrl: queueUrl,
+              ReceiptHandle: message.ReceiptHandle,
+            }));
 
-            return params.adapter.deserialize(message);
+            return message;
           }),
+          map(params.adapter.deserialize),
           catchError((err) => {
             console.error(err);
             
             return EMPTY;
-          })
+          }),
         )
       ),
       filter(params.validator.verify),
+      share({
+        resetOnRefCountZero: true,
+      }),
     );
 }
