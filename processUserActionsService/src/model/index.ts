@@ -20,6 +20,15 @@ const sequelize = new Sequelize(dbConfig.name, dbConfig.username, dbConfig.passw
   minifyAliases: true,
 });
 
+async function createBackup() {
+  /**
+   * Database backup creation logic
+   * (create dump, send it to remote
+   * server / static files hosting etc.)
+   */
+  console.log('Create database backup');
+}
+
 const models = {
   User: User.init(sequelize),
   UserAction: UserAction.init(sequelize),
@@ -32,6 +41,7 @@ Object
 
 export default {
   ...models,
+  createBackup,
   sequelize,
   Sequelize,
 };

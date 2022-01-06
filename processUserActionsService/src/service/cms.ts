@@ -4,4 +4,5 @@ export async function requestForRemarketing(url) {
    * programming, this method is just an example
    * (so I left it without implementation)
    */
+  console.log(`Send request for remarketing. URL: ${url}`);
 }

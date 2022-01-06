@@ -2,7 +2,7 @@ import { UserActionType } from "../enum/userActionType";
 
 export type UserAction = {
   type: UserActionType;
-  userId: string;
+  userId: number;
   url: string;
   timestamp: number;
 };

@@ -21,11 +21,18 @@ function getUserActionType(message): UserActionType {
   }
 }
 
+/**
+ * 
+ * @param message - Object with message
+ * @returns 
+ */
 export function deserialize(message): UserAction {
+  const body = JSON.parse(message.Body);
+
   return {
-    type: getUserActionType(message),
-    userId: message.usedId,
-    url: message.url,
-    timestamp: message.timestamp,
-  }
+    type: getUserActionType(body),
+    userId: parseInt(body.userId),
+    url: body.url,
+    timestamp: parseInt(message.Attributes.SentTimestamp),
+  };
 }
